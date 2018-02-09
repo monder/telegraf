@@ -177,6 +177,7 @@ configuration options.
 * [net_response](./plugins/inputs/net_response)
 * [nginx](./plugins/inputs/nginx)
 * [nginx_plus](./plugins/inputs/nginx_plus)
+* [nginx_vts](./plugins/inputs/nginx_vts)
 * [nsq](./plugins/inputs/nsq)
 * [nstat](./plugins/inputs/nstat)
 * [ntpq](./plugins/inputs/ntpq)
