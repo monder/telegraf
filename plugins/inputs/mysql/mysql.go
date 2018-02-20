@@ -257,7 +257,7 @@ const (
 const (
 	globalStatusQuery          = `SHOW GLOBAL STATUS`
 	globalVariablesQuery       = `SHOW GLOBAL VARIABLES`
-	slaveStatusQuery           = `SHOW SLAVE STATUS`
+	slaveStatusQuery           = `SHOW ALL SLAVES STATUS`
 	binaryLogsQuery            = `SHOW BINARY LOGS`
 	infoSchemaProcessListQuery = `
         SELECT COALESCE(command,''),COALESCE(state,''),count(*)
@@ -571,12 +571,11 @@ func (m *Mysql) gatherSlaveStatuses(db *sql.DB, serv string, acc telegraf.Accumu
 
 	servtag := getDSNTag(serv)
 
-	tags := map[string]string{"server": servtag}
-	fields := make(map[string]interface{})
-
 	// to save the column names as a field key
 	// scanning keys and values separately
-	if rows.Next() {
+	for rows.Next() {
+		fields := make(map[string]interface{})
+		tags := map[string]string{"server": servtag}
 		// get columns names, and create an array with its length
 		cols, err := rows.Columns()
 		if err != nil {
@@ -594,6 +593,9 @@ func (m *Mysql) gatherSlaveStatuses(db *sql.DB, serv string, acc telegraf.Accumu
 		for i, col := range cols {
 			col = strings.ToLower(col)
 			if value, ok := parseValue(*vals[i].(*sql.RawBytes)); ok {
+				if col == "connection_name" {
+					tags["slave"] = fmt.Sprintf("%v", value)
+				}
 				fields["slave_"+col] = value
 			}
 		}
